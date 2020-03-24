@@ -26,6 +26,11 @@ exports.builder = yargs =>
         describe: "Preserve original committer in addition to original author",
         type: "boolean",
       },
+      "since-commit": {
+        group: "Command Options:",
+        describe: "Pull remote commits after a specific commit SHA",
+        type: "string",
+      },
       y: {
         group: "Command Options:",
         describe: "Skip all confirmation prompts",

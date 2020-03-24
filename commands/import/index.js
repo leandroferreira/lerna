@@ -75,10 +75,6 @@ class ImportCommand extends Command {
     const lernaRootRelativeToGitRoot = path.relative(gitRepoRoot, this.project.rootPath);
     this.targetDirRelativeToGitRoot = path.join(lernaRootRelativeToGitRoot, targetDir);
 
-    if (fs.existsSync(path.resolve(this.project.rootPath, targetDir))) {
-      throw new ValidationError("EEXISTS", `Target directory already exists "${targetDir}"`);
-    }
-
     this.commits = this.externalExecSync("git", this.gitParamsForTargetCommits())
       .split("\n")
       .reverse();
@@ -89,6 +85,16 @@ class ImportCommand extends Command {
     //   "--reverse",
     //   "HEAD",
     // ]).split("\n");
+
+    if (fs.existsSync(path.resolve(this.project.rootPath, targetDir))) {
+      const sinceCommit = this.options["since-commit"];
+      if (sinceCommit) {
+        // Get all commits after "since-commit"
+        this.commits = this.externalExecSync("git", [...this.gitParamsForTargetCommits(), `${sinceCommit}..HEAD`])
+      } else {
+        throw new ValidationError("EEXISTS", `Target directory already exists "${targetDir}"`);
+      }
+    }
 
     if (!this.commits.length) {
       throw new ValidationError("NOCOMMITS", `No git commits to import at "${inputPath}"`);
